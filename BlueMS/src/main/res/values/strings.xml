@@ -37,13 +37,11 @@
 
 <resources>
 
-    <string name="app_name" translatable="false">ST BLE Sensor</string>
+    <string name="app_name" translatable="false">Blind Guardian</string>
 
     <string name="title_activity_debug_console">Debug Console</string>
 
     <string name="title_activity_nfc_node_connection">Nfc Node</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

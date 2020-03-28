@@ -37,10 +37,14 @@
 
 package com.st.BlueMS;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
+import it.edu.gcaruso.blindguardian.BluetoothHandler;
+import it.edu.gcaruso.blindguardian.HeartRateMeasurement;
 
 import android.util.Log;
 import android.view.MenuItem;
@@ -123,8 +127,8 @@ public class DemosActivity extends com.st.BlueSTSDK.gui.DemosActivity {
     }//getStartIntent
 
     @DemoDescriptionAnnotation(name="Firmware Upgrade",
-            requareAll = {RebootOTAModeFeature.class},
-            iconRes = com.st.BlueSTSDK.gui.R.drawable.ota_upload_fw )
+            iconRes = com.st.BlueSTSDK.gui.R.drawable.ota_upload_fw,
+            requareAll = {RebootOTAModeFeature.class})
     public static class StartOtaRebootFragment extends com.st.STM32WB.fwUpgrade.statOtaConfig.StartOtaRebootFragment{
         //empty class redefined just to set the icon res in the annotation
     }
@@ -135,6 +139,34 @@ public class DemosActivity extends com.st.BlueSTSDK.gui.DemosActivity {
     public static class LedButtonControlFragment extends com.st.STM32WB.p2pDemo.LedButtonControlFragment{
         //empty class redefined just to set the icon res in the annotation
     }
+
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        initBluetoothHandler();
+    }
+
+    private final BroadcastReceiver heartRateDataReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            HeartRateMeasurement measurement = (HeartRateMeasurement) intent.getSerializableExtra("HeartRate");
+            Log.d("blue", measurement.pulse.toString());
+        }
+    };
+
+    private void initBluetoothHandler() {
+        Log.d("blue", "BluetoothHandler");
+        BluetoothHandler.getInstance(getApplicationContext());
+        registerReceiver(heartRateDataReceiver, new IntentFilter( "HeartRateMeasurement" ));
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d("blue", "Destroying activity");
+        unregisterReceiver(heartRateDataReceiver);
+    }
+
+
 
     /**
      * List of all the class that extend DemoFragment class, if the board match the requirement

@@ -1,6 +1,7 @@
 include ':BlueMS',
         ':BlueMSCloud',
         ':BlueSTSDK',
-        ':BlueSTSDK_Gui_Android'
+        ':BlueSTSDK_Gui_Android',
+        ':blessed'
 
 project(':BlueSTSDK').projectDir = new File('BlueSTSDK/BlueSTSDK')
