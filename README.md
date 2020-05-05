@@ -1,6 +1,6 @@
-# ST BLE Sensor
+# BLIND GUARDIAN
 
-This repository contains the ST BLE Sensor app source code.
+This repository contains the Blind Guardian Project, forked from the ST BLE Sensor app source code.
 
 Used in conjunction with a firmware compatible with the BlueST protocol, the ST BLE Sensor application allow the user to access to all the sensors data, to request and download algorithm licenses, and to update the firmware directly from a mobile device via the Bluetooth® Low Energy protocol.
 As an example, [BLUEMICROSYSTEM1](http://www.st.com/content/st_com/en/products/embedded-software/mems-and-sensors-software/open-mems/bluemicrosystem1.html) expansion software package for STM32Cube lets the user read and display real-time inertial (e.g. motion MEMS) and environmental (e.g. humidity, pressure, temperature) sensor data. It also provides a set of Open.Mems library functionalities like motion-sensor data fusion (osxMotionFX), activity recognition (osxMotionAR) and pedometer (osxMotionPM).
@@ -24,6 +24,7 @@ git submodule update --init --recursive
 
 ## License
 
+ST BLE Sensor App is
 Copyright (c) 2017  STMicroelectronics – All rights reserved
 The STMicroelectronics corporate logo is a trademark of STMicroelectronics
 
