@@ -43,9 +43,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
-import it.edu.gcaruso.blindguardian.BluetoothHandler;
-import it.edu.gcaruso.blindguardian.HeartRateMeasurement;
+import it.villaggioinformatico.blindguardian.BluetoothHandler;
+import it.villaggioinformatico.blindguardian.HeartRateMeasurement;
 
+import android.os.Vibrator;
 import android.util.Log;
 import android.view.MenuItem;
 
@@ -82,7 +83,6 @@ import com.st.BlueMS.demos.motionAlgorithm.MotionAlgorithmFragment;
 import com.st.BlueMS.demos.multiNN.MultiNeuralNetworkFragment;
 import com.st.BlueMS.demos.plot.PlotFeatureFragment;
 import com.st.BlueMS.preference.nucleo.SettingsWithNucleoConfiguration;
-import com.st.BlueSTSDK.Debug;
 import com.st.BlueSTSDK.ExportedFeature;
 import com.st.BlueSTSDK.Features.Audio.Opus.ExportedFeatureAudioOpus;
 import com.st.BlueSTSDK.Node;
@@ -90,7 +90,6 @@ import com.st.BlueSTSDK.NodeServer;
 import com.st.BlueSTSDK.Utils.ConnectionOption;
 import com.st.BlueSTSDK.gui.demos.DemoDescriptionAnnotation;
 import com.st.BlueSTSDK.gui.demos.DemoFragment;
-import com.st.BlueSTSDK.gui.fwUpgrade.download.DownloadFwFileCompletedReceiver;
 import com.st.STM32WB.fwUpgrade.feature.RebootOTAModeFeature;
 import com.st.STM32WB.p2pDemo.feature.FeatureControlLed;
 import com.st.STM32WB.p2pDemo.feature.FeatureSwitchStatus;
@@ -98,8 +97,6 @@ import com.st.STM32WB.p2pDemo.feature.FeatureSwitchStatus;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -146,10 +143,23 @@ public class DemosActivity extends com.st.BlueSTSDK.gui.DemosActivity {
     }
 
     private final BroadcastReceiver heartRateDataReceiver = new BroadcastReceiver() {
+        HeartRateMeasurement measurement = null;
+        int previousSample = 99;
         @Override
         public void onReceive(Context context, Intent intent) {
-            HeartRateMeasurement measurement = (HeartRateMeasurement) intent.getSerializableExtra("HeartRate");
+            measurement = (HeartRateMeasurement) intent.getSerializableExtra("HeartRate");
             Log.d("blue", measurement.pulse.toString());
+            // Get instance of Vibrator from current Context
+            if (previousSample < 10 && measurement.pulse < 10) {
+                Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                v.vibrate(400);
+            }
+            previousSample = measurement.pulse;
+            /*
+            Intent i = new Intent("blind_guardian");
+            i.putExtra("distance", measurement.pulse.toString());
+            context.sendBroadcast(i);
+            */
         }
     };
 
@@ -169,8 +179,8 @@ public class DemosActivity extends com.st.BlueSTSDK.gui.DemosActivity {
 
 
     /**
-     * List of all the class that extend DemoFragment class, if the board match the requirement
-     * for the demo it will displayed
+     * List of all the class that extend DemoFragment class. They will be displayed if the board match the requirement
+     * for the demo
      */
     @SuppressWarnings("unchecked")
     private final static Class<? extends DemoFragment>[] ALL_DEMOS = new Class[]{

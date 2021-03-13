@@ -37,6 +37,7 @@
 
 package com.st.BlueMS.demos;
 
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -47,6 +48,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.st.BlueMS.DemosActivity;
 import com.st.BlueMS.demos.util.BaseDemoFragment;
 import com.st.BlueMS.R;
 import com.st.BlueSTSDK.Feature;
@@ -57,7 +59,9 @@ import com.st.BlueSTSDK.Features.FeatureTemperature;
 import com.st.BlueSTSDK.Node;
 import com.st.BlueSTSDK.gui.demos.DemoDescriptionAnnotation;
 
+import java.net.URISyntaxException;
 import java.util.List;
+
 
 /**
  * Show the Temperature, Humidity, lux and barometer values. Each value will have also its icon
@@ -71,10 +75,10 @@ public class EnvironmentalSensorsFragment extends BaseDemoFragment {
     /**
      * format used for print the different environmental values
      */
-    private final static String TEMP_FORMAT = "%.1f [%s]";
-    private final static String HUM_FORMAT ="%.1f [%s]";
-    private final static String PRES_FORMAT="%.2f [%s]";
-    private final static String LUX_FORMAT="%.1f [%s]";
+    private final static String TEMP_FORMAT = "%.1f %s";
+    private final static String HUM_FORMAT ="%.1f %s";
+    private final static String PRES_FORMAT="%.2f %s";
+    private final static String LUX_FORMAT="%.1f %s";
 
 
     /**
@@ -399,16 +403,26 @@ public class EnvironmentalSensorsFragment extends BaseDemoFragment {
         }
 
         mLuminosity = node.getFeatures(FeatureLuminosity.class);
-        if(!mLuminosity.isEmpty()) {
+        if (!mLuminosity.isEmpty()) {
             View.OnClickListener forceUpdate = new ForceUpdateFeature(mLuminosity);
             mLuminosityImage.setOnClickListener(forceUpdate);
             for (Feature f : mLuminosity) {
                 f.addFeatureListener(mLuminosityListener);
                 node.enableNotification(f);
             }//for
-        }else{
+        } else {
+            /*
+            Intent intent = null;
+            try {
+                intent = Intent.parseUri("blind_guardian",0);
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            }
+            String message = intent.getStringExtra("distance");
+            */
+            String message = "Non disponibile";
+            updateGui(() -> mLuminosityText.setText(message));
             updateGui(() -> mLuminosityImage.setImageResource(R.drawable.illuminance_missing));
-
         }
 
     }//enableNeededNotification

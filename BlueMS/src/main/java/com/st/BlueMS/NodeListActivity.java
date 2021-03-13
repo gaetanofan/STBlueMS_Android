@@ -38,6 +38,8 @@
 package com.st.BlueMS;
 
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 
 import com.st.BlueNRG.fwUpgrade.BlueNRGAdvertiseFilter;
@@ -89,13 +91,14 @@ public class NodeListActivity extends com.st.BlueSTSDK.gui.NodeListActivity {
 
         n.enableNodeServer(BLENodeDefines.FeatureCharacteristics.getDefaultExportedFeature());
 
-        if(n.getAdvertiseInfo() instanceof BlueNRGAdvertiseFilter.BlueNRGAdvertiseInfo)
+        if (n.getAdvertiseInfo() instanceof BlueNRGAdvertiseFilter.BlueNRGAdvertiseInfo)
             startActivity(FwUpgradeActivity.getStartIntent(this, n,false,options));
-        else if(n.getType()== Node.Type.STEVAL_WESU1)
+        else if (n.getType()== Node.Type.STEVAL_WESU1)
             startActivity(DemosActivityWesu.getStartIntent(this,n,options));
         else if (STM32OTASupport.isOTANode(n)){
             startActivity(FwUpgradeSTM32WBActivity.getStartIntent(this, n,null,null,null));
-        }else {
+        } else {
+            Log.d("blind", "Starting intent");
             startActivity(DemosActivity.getStartIntent(this, n, options));
         }
 
