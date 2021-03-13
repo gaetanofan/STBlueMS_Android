@@ -1,4 +1,4 @@
-package it.edu.gcaruso.blindguardian;
+package it.villaggioinformatico.blindguardian;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGattCharacteristic;
@@ -21,10 +21,6 @@ import android.util.Log;
 import static android.bluetooth.BluetoothGatt.CONNECTION_PRIORITY_HIGH;
 import static android.bluetooth.BluetoothGattCharacteristic.PROPERTY_WRITE;
 import static android.bluetooth.BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT;
-import static com.welie.blessed.BluetoothBytesParser.FORMAT_UINT16;
-import static com.welie.blessed.BluetoothBytesParser.FORMAT_UINT8;
-import static com.welie.blessed.BluetoothBytesParser.bytes2String;
-import static com.welie.blessed.BluetoothPeripheral.GATT_SUCCESS;
 import static java.lang.Math.abs;
 
 public class BluetoothHandler {
@@ -73,13 +69,13 @@ public class BluetoothHandler {
             peripheral.requestConnectionPriority(CONNECTION_PRIORITY_HIGH);
 
             // Read manufacturer and model number from the Device Information Service
-            if(peripheral.getService(DIS_SERVICE_UUID) != null) {
+            if (peripheral.getService(DIS_SERVICE_UUID) != null) {
                 peripheral.readCharacteristic(peripheral.getCharacteristic(DIS_SERVICE_UUID, MANUFACTURER_NAME_CHARACTERISTIC_UUID));
                 peripheral.readCharacteristic(peripheral.getCharacteristic(DIS_SERVICE_UUID, MODEL_NUMBER_CHARACTERISTIC_UUID));
             }
 
             // Turn on notifications for Current Time Service
-            if(peripheral.getService(CTS_SERVICE_UUID) != null) {
+            if (peripheral.getService(CTS_SERVICE_UUID) != null) {
                 BluetoothGattCharacteristic currentTimeCharacteristic = peripheral.getCharacteristic(CTS_SERVICE_UUID, CURRENT_TIME_CHARACTERISTIC_UUID);
                 peripheral.setNotify(currentTimeCharacteristic, true);
 
@@ -95,22 +91,22 @@ public class BluetoothHandler {
             }
 
             // Turn on notifications for Battery Service
-            if(peripheral.getService(BTS_SERVICE_UUID) != null) {
+            if (peripheral.getService(BTS_SERVICE_UUID) != null) {
                 peripheral.setNotify(peripheral.getCharacteristic(BTS_SERVICE_UUID, BATTERY_LEVEL_CHARACTERISTIC_UUID), true);
             }
 
             // Turn on notifications for Blood Pressure Service
-            if(peripheral.getService(BLP_SERVICE_UUID) != null) {
+            if (peripheral.getService(BLP_SERVICE_UUID) != null) {
                 peripheral.setNotify(peripheral.getCharacteristic(BLP_SERVICE_UUID, BLOOD_PRESSURE_MEASUREMENT_CHARACTERISTIC_UUID), true);
             }
 
             // Turn on notification for Health Thermometer Service
-            if(peripheral.getService(HTS_SERVICE_UUID) != null) {
+            if (peripheral.getService(HTS_SERVICE_UUID) != null) {
                 peripheral.setNotify(peripheral.getCharacteristic(HTS_SERVICE_UUID, TEMPERATURE_MEASUREMENT_CHARACTERISTIC_UUID), true);
             }
 
             // Turn on notification for Heart Rate  Service
-            if(peripheral.getService(HRS_SERVICE_UUID) != null) {
+            if (peripheral.getService(HRS_SERVICE_UUID) != null) {
                 peripheral.setNotify(peripheral.getCharacteristic(HRS_SERVICE_UUID, HEARTRATE_MEASUREMENT_CHARACTERISTIC_UUID), true);
             }
 
@@ -121,8 +117,8 @@ public class BluetoothHandler {
 
         @Override
         public void onNotificationStateUpdate(BluetoothPeripheral peripheral, BluetoothGattCharacteristic characteristic, int status) {
-            if( status == BluetoothPeripheral.GATT_SUCCESS) {
-                if(peripheral.isNotifying(characteristic)) {
+            if (status == BluetoothPeripheral.GATT_SUCCESS) {
+                if (peripheral.isNotifying(characteristic)) {
                     Log.v("blue", "SUCCESS: Notify set to 'on' for" + characteristic.getUuid());
                 } else {
                     Log.v("blue", "SUCCESS: Notify set to 'off' for "+characteristic.getUuid());
@@ -134,7 +130,7 @@ public class BluetoothHandler {
 
         @Override
         public void onCharacteristicWrite(BluetoothPeripheral peripheral, byte[] value, BluetoothGattCharacteristic characteristic, int status) {
-            if( status == BluetoothPeripheral.GATT_SUCCESS) {
+            if (status == BluetoothPeripheral.GATT_SUCCESS) {
                 //Timber.i("SUCCESS: Writing <%s> to <%s>", bytes2String(value), characteristic.getUuid().toString());
             } else {
                 //Timber.i("ERROR: Failed writing <%s> to <%s>", bytes2String(value), characteristic.getUuid().toString());
@@ -143,26 +139,26 @@ public class BluetoothHandler {
 
         @Override
         public void onCharacteristicUpdate(BluetoothPeripheral peripheral, byte[] value, BluetoothGattCharacteristic characteristic, int status) {
-            if(status != BluetoothPeripheral.GATT_SUCCESS) return;
+            if (status != BluetoothPeripheral.GATT_SUCCESS) return;
             UUID characteristicUUID = characteristic.getUuid();
             BluetoothBytesParser parser = new BluetoothBytesParser(value);
 
-            if(characteristicUUID.equals(HEARTRATE_MEASUREMENT_CHARACTERISTIC_UUID)) {
-               HeartRateMeasurement measurement = new HeartRateMeasurement(value);
+            if (characteristicUUID.equals(HEARTRATE_MEASUREMENT_CHARACTERISTIC_UUID)) {
+                HeartRateMeasurement measurement = new HeartRateMeasurement(value);
                 Intent intent = new Intent("HeartRateMeasurement");
                 intent.putExtra("HeartRate", measurement);
                 context.sendBroadcast(intent);
                 // Timber.d("%s", measurement);
             }
-            else if(characteristicUUID.equals(BATTERY_LEVEL_CHARACTERISTIC_UUID)) {
+            else if (characteristicUUID.equals(BATTERY_LEVEL_CHARACTERISTIC_UUID)) {
                 int batteryLevel = parser.getIntValue(BluetoothBytesParser.FORMAT_UINT8);
                 //Timber.i("Received battery level %d%%", batteryLevel);
             }
-            else if(characteristicUUID.equals(MANUFACTURER_NAME_CHARACTERISTIC_UUID)) {
+            else if (characteristicUUID.equals(MANUFACTURER_NAME_CHARACTERISTIC_UUID)) {
                 String manufacturer = parser.getStringValue(0);
                 //Timber.i("Received manufacturer: %s", manufacturer);
             }
-            else if(characteristicUUID.equals(MODEL_NUMBER_CHARACTERISTIC_UUID)) {
+            else if (characteristicUUID.equals(MODEL_NUMBER_CHARACTERISTIC_UUID)) {
                 String modelNumber = parser.getStringValue(0);
                 //Timber.i("Received modelnumber: %s", modelNumber);
             }
@@ -206,7 +202,7 @@ public class BluetoothHandler {
         @Override
         public void onBluetoothAdapterStateChanged(int state) {
             //Timber.i("bluetooth adapter changed state to %d", state);
-            if(state == BluetoothAdapter.STATE_ON) {
+            if (state == BluetoothAdapter.STATE_ON) {
                 // Bluetooth is on now, start scanning again
                 // Scan for peripherals with a certain service UUIDs
                 central.startPairingPopupHack();
