@@ -29,9 +29,9 @@ allprojects {
 ext {
     // Sdk and tools
     minSdkVersion = 21
-    targetSdkVersion = 29
-    compileSdkVersion = 29
-    buildToolsVersion = '29.0.2'
+    targetSdkVersion = 30
+    compileSdkVersion = 30
+    buildToolsVersion = '30.0.3'
 
     androidx_appCompatVersion = '1.1.0'
     androidx_fragmentVersion = '1.2.0-rc03'
