@@ -43,6 +43,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
+
+import it.villaggioinformatico.blindguardian.BlindFragment;
 import it.villaggioinformatico.blindguardian.BluetoothHandler;
 import it.villaggioinformatico.blindguardian.HeartRateMeasurement;
 
@@ -184,6 +186,7 @@ public class DemosActivity extends com.st.BlueSTSDK.gui.DemosActivity {
      */
     @SuppressWarnings("unchecked")
     private final static Class<? extends DemoFragment>[] ALL_DEMOS = new Class[]{
+            BlindFragment.class,
             EnvironmentalSensorsFragment.class,
             MemsSensorFusionFragment.class,
             FFTAmplitudeFragment.class,
@@ -216,8 +219,7 @@ public class DemosActivity extends com.st.BlueSTSDK.gui.DemosActivity {
             FitnessActivityFragment.class,
             MachineLearningCoreFragment.class,
             FiniteStateMachineFragment.class,
-            NodeStatusFragment.class,
-            //FeatureDebugFragment.class
+            NodeStatusFragment.class
     };
 
     @SuppressWarnings("unchecked")
