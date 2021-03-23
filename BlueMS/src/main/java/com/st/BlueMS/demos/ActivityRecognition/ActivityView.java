@@ -49,7 +49,7 @@ import com.st.BlueSTSDK.Features.FeatureActivity.ActivityType;
 /**
  * common class between all the ones that display different activity icons
  */
-abstract class ActivityView extends ConstraintLayout{
+public abstract class ActivityView extends ConstraintLayout{
 
     /**
      * alpha to use for the selected image

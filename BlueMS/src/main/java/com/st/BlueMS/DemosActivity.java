@@ -43,12 +43,15 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
+import androidx.fragment.*;
 
-import it.villaggioinformatico.blindguardian.BlindFragment;
+import it.villaggioinformatico.blindguardian.BlindFragmentRaw;
+import it.villaggioinformatico.blindguardian.BlindRecognitionFragment;
 import it.villaggioinformatico.blindguardian.BluetoothHandler;
 import it.villaggioinformatico.blindguardian.HeartRateMeasurement;
 
 import android.os.Vibrator;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.MenuItem;
 
@@ -87,6 +90,7 @@ import com.st.BlueMS.demos.plot.PlotFeatureFragment;
 import com.st.BlueMS.preference.nucleo.SettingsWithNucleoConfiguration;
 import com.st.BlueSTSDK.ExportedFeature;
 import com.st.BlueSTSDK.Features.Audio.Opus.ExportedFeatureAudioOpus;
+import com.st.BlueSTSDK.Features.FeatureActivity;
 import com.st.BlueSTSDK.Node;
 import com.st.BlueSTSDK.NodeServer;
 import com.st.BlueSTSDK.Utils.ConnectionOption;
@@ -101,11 +105,15 @@ import java.util.Arrays;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Activity that display all the demo available for the node
  */
-public class DemosActivity extends com.st.BlueSTSDK.gui.DemosActivity {
+public class DemosActivity extends com.st.BlueSTSDK.gui.DemosActivity  implements BlindRecognitionFragment.OnFragmentInteractionListener {
+
+    FeatureActivity.ActivityType mystatus = FeatureActivity.ActivityType.NO_ACTIVITY;
+    TextToSpeech t1;
 
     /**
      * create an intent for start this activity
@@ -125,6 +133,13 @@ public class DemosActivity extends com.st.BlueSTSDK.gui.DemosActivity {
         return  getStartIntent(c,node, ConnectionOption.buildDefault());
     }//getStartIntent
 
+    @Override
+    public void onStatusChange(FeatureActivity.ActivityType status) {
+        mystatus = status;
+        Log.d("blind", "Stato " + mystatus.name());
+        t1.speak(mystatus.name(), TextToSpeech.QUEUE_FLUSH, null,null);
+    }
+
     @DemoDescriptionAnnotation(name="Firmware Upgrade",
             iconRes = com.st.BlueSTSDK.gui.R.drawable.ota_upload_fw,
             requareAll = {RebootOTAModeFeature.class})
@@ -142,26 +157,40 @@ public class DemosActivity extends com.st.BlueSTSDK.gui.DemosActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initBluetoothHandler();
+        t1 = new TextToSpeech(getApplicationContext(), ttstatus -> {
+            if (ttstatus != TextToSpeech.ERROR) {
+                t1.setLanguage(Locale.getDefault());
+            }
+            else {
+                Log.d("blind", "error" + ttstatus);
+            }
+        });
     }
 
     private final BroadcastReceiver heartRateDataReceiver = new BroadcastReceiver() {
         HeartRateMeasurement measurement = null;
         int previousSample = 99;
+        boolean dillo = true;
+
         @Override
         public void onReceive(Context context, Intent intent) {
             measurement = (HeartRateMeasurement) intent.getSerializableExtra("HeartRate");
             Log.d("blue", measurement.pulse.toString());
             // Get instance of Vibrator from current Context
             if (previousSample < 10 && measurement.pulse < 10) {
-                Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-                v.vibrate(400);
+                dillo = true; // TODO: da resettare con un timer
+                if (mystatus != FeatureActivity.ActivityType.STATIONARY) {
+                    Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                    v.vibrate(400);
+                }
+                else {
+                    if (dillo) {
+                        t1.speak("Troppo vicino ma fermo", TextToSpeech.QUEUE_FLUSH, null, null);
+                    }
+                    dillo = false;
+                }
             }
             previousSample = measurement.pulse;
-            /*
-            Intent i = new Intent("blind_guardian");
-            i.putExtra("distance", measurement.pulse.toString());
-            context.sendBroadcast(i);
-            */
         }
     };
 
@@ -186,7 +215,7 @@ public class DemosActivity extends com.st.BlueSTSDK.gui.DemosActivity {
      */
     @SuppressWarnings("unchecked")
     private final static Class<? extends DemoFragment>[] ALL_DEMOS = new Class[]{
-            BlindFragment.class,
+            BlindRecognitionFragment.class,
             EnvironmentalSensorsFragment.class,
             MemsSensorFusionFragment.class,
             FFTAmplitudeFragment.class,

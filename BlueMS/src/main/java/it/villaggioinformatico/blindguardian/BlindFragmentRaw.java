@@ -73,7 +73,7 @@ import com.st.BlueSTSDK.Features.FeatureTemperature;
 @DemoDescriptionAnnotation(name="BlindGuardianDemo",iconRes=R.drawable.demo_environmental_sensor,
         requareOneOf = {FeatureHumidity.class,FeatureLuminosity.class,FeaturePressure.class,
                 FeatureTemperature.class})
-public class BlindFragment extends BaseDemoFragment {
+public class BlindFragmentRaw extends BaseDemoFragment {
 
     private interface ExtractDataFunction{
         float getData(Feature.Sample s);
@@ -158,9 +158,9 @@ public class BlindFragment extends BaseDemoFragment {
             updateGui(() -> {
 
                     try {
-                        // mTemperatureText.setText("X:" + x);
-                        // mHumidityText.setText("Y:" + y);
-                        // mPressureText.setText("Z: " + z);
+                        mTemperatureText.setText("X:" + x);
+                        mHumidityText.setText("Y:" + y);
+                        mPressureText.setText("Z: " + z);
                         mLuminosityText.setText("NA");
                     } catch (NullPointerException e) {
                         //this exception can happen when the task is run after the fragment is destroyed
@@ -169,7 +169,7 @@ public class BlindFragment extends BaseDemoFragment {
         }
     };
 
-    public BlindFragment() {
+    public BlindFragmentRaw() {
         // Required empty public constructor
     }
 
