@@ -54,6 +54,7 @@ import android.os.Vibrator;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.WindowManager;
 
 import com.st.BlueMS.demos.AccEvent.AccEventFragment;
 import com.st.BlueMS.demos.ActivityRecognition.ActivityRecognitionFragment;
@@ -106,6 +107,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Timer;
 
 /**
  * Activity that display all the demo available for the node
@@ -137,7 +139,23 @@ public class DemosActivity extends com.st.BlueSTSDK.gui.DemosActivity  implement
     public void onStatusChange(FeatureActivity.ActivityType status) {
         mystatus = status;
         Log.d("blind", "Stato " + mystatus.name());
-        t1.speak(mystatus.name(), TextToSpeech.QUEUE_FLUSH, null,null);
+        String stato = toItalian(mystatus);
+        t1.speak(stato, TextToSpeech.QUEUE_FLUSH, null,null);
+    }
+
+    private String toItalian(FeatureActivity.ActivityType name) {
+        switch (name){
+            case NO_ACTIVITY:
+                return "";
+            case STATIONARY:
+                return "Sei fermo";
+            case WALKING:
+                return "Stai cammminando";
+            case JOGGING:
+                return "Stai correndo";
+            default:
+                return name.toString();
+        }
     }
 
     @DemoDescriptionAnnotation(name="Firmware Upgrade",
@@ -165,12 +183,16 @@ public class DemosActivity extends com.st.BlueSTSDK.gui.DemosActivity  implement
                 Log.d("blind", "error" + ttstatus);
             }
         });
+        //TODO: this can cause some hang-on when dealing with fragments, as in our case
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
+
 
     private final BroadcastReceiver heartRateDataReceiver = new BroadcastReceiver() {
         HeartRateMeasurement measurement = null;
         int previousSample = 99;
         boolean dillo = true;
+        long time = 0L;
 
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -178,13 +200,21 @@ public class DemosActivity extends com.st.BlueSTSDK.gui.DemosActivity  implement
             Log.d("blue", measurement.pulse.toString());
             // Get instance of Vibrator from current Context
             if (previousSample < 10 && measurement.pulse < 10) {
-                dillo = true; // TODO: da resettare con un timer
+                if (System.currentTimeMillis() - time > 1800) {
+                    dillo = true;
+                }
                 if (mystatus != FeatureActivity.ActivityType.STATIONARY) {
-                    Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-                    v.vibrate(400);
+                    if (dillo) {
+                        time = System.currentTimeMillis();
+                        t1.speak("Attento! Attento!", TextToSpeech.QUEUE_FLUSH, null, null);
+                        Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                        v.vibrate(1000);
+                        dillo = false;
+                    }
                 }
                 else {
                     if (dillo) {
+                        time = System.currentTimeMillis();
                         t1.speak("Troppo vicino ma fermo", TextToSpeech.QUEUE_FLUSH, null, null);
                     }
                     dillo = false;
