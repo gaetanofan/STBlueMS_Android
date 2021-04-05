@@ -43,9 +43,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
-import androidx.fragment.*;
 
-import it.villaggioinformatico.blindguardian.BlindFragmentRaw;
+import it.villaggioinformatico.blindguardian.BlindDistanceActivity;
 import it.villaggioinformatico.blindguardian.BlindRecognitionFragment;
 import it.villaggioinformatico.blindguardian.BluetoothHandler;
 import it.villaggioinformatico.blindguardian.HeartRateMeasurement;
@@ -107,7 +106,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.Timer;
 
 /**
  * Activity that display all the demo available for the node
@@ -116,6 +114,7 @@ public class DemosActivity extends com.st.BlueSTSDK.gui.DemosActivity  implement
 
     FeatureActivity.ActivityType mystatus = FeatureActivity.ActivityType.NO_ACTIVITY;
     TextToSpeech t1;
+    int threshold_distance = 10;
 
     /**
      * create an intent for start this activity
@@ -138,7 +137,7 @@ public class DemosActivity extends com.st.BlueSTSDK.gui.DemosActivity  implement
     @Override
     public void onStatusChange(FeatureActivity.ActivityType status) {
         mystatus = status;
-        Log.d("blind", "Stato " + mystatus.name());
+        // Log.d("blind", "Stato " + mystatus.name());
         String stato = toItalian(mystatus);
         t1.speak(stato, TextToSpeech.QUEUE_FLUSH, null,null);
     }
@@ -199,7 +198,7 @@ public class DemosActivity extends com.st.BlueSTSDK.gui.DemosActivity  implement
             measurement = (HeartRateMeasurement) intent.getSerializableExtra("HeartRate");
             Log.d("blue", measurement.pulse.toString());
             // Get instance of Vibrator from current Context
-            if (previousSample < 10 && measurement.pulse < 10) {
+            if (previousSample < threshold_distance && measurement.pulse < threshold_distance) {
                 if (System.currentTimeMillis() - time > 1800) {
                     dillo = true;
                 }
@@ -316,6 +315,8 @@ public class DemosActivity extends com.st.BlueSTSDK.gui.DemosActivity  implement
         return true;
     }
 
+    private static final int DISTANCE_ACTIVITY_REQUEST_CODE = 42;
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -326,9 +327,22 @@ public class DemosActivity extends com.st.BlueSTSDK.gui.DemosActivity  implement
             return true;
         }
 
+        if (id == R.id.settingDistance){
+            startActivityForResult(new Intent(this.getApplicationContext(), BlindDistanceActivity.class), DISTANCE_ACTIVITY_REQUEST_CODE);
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (DISTANCE_ACTIVITY_REQUEST_CODE == requestCode && RESULT_OK == resultCode) {
+            // Fetch the score from the Intent
+            threshold_distance = data.getIntExtra(BlindDistanceActivity.BUNDLE_EXTRA_SCORE, 0);
+            Log.d("blind", "Allowed obstacle distance: " + threshold_distance);
+        }
+    }
 
     @Override
     protected void onStart() {
